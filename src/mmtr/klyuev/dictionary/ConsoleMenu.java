@@ -1,25 +1,45 @@
 package mmtr.klyuev.dictionary;
 
-import java.util.Locale;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import java.util.Scanner;
 import java.util.Formatter;
 
 public class ConsoleMenu {
 
-    private DictionaryStorage dictionaryStorage = new DictionaryStorageOnFileSystem();
-    private DictionaryMatchingCondition digitDict = new DigitDict();
-    private DictionaryMatchingCondition latinDict = new LatinDict();
-    private CheckMenuItems dictionarySelection = new CheckingDictionarySelection();
-    private CheckMenuItems actionSelection = new CheckingDictionaryActionSelection();
-    private CheckMenuItems checkExitPoint = new CheckExitPointFromMethod();
+    @Autowired
+    private DictionaryStorage dictionaryStorageOnFileSystem;
+
+    @Autowired
+    @Qualifier("latinDict")
+    private DictionaryMatchingCondition latinDict;
+
+    @Autowired
+    @Qualifier("digitDict")
+    private DictionaryMatchingCondition digitDict;
+
+    @Autowired
+    @Qualifier("checkingDictionarySelection")
+    private CheckMenuItems checkingDictionarySelection;
+
+    @Autowired
+    @Qualifier("checkingDictionaryActionSelection")
+    private CheckMenuItems checkingDictionaryActionSelection;
+
+    @Autowired
+    @Qualifier("checkExitPointFromMethod")
+    private CheckMenuItems checkExitPointFromMethod;
+
     private Formatter formatter = new Formatter();
     private Scanner in = new Scanner(System.in);
+
     private final String DELIMITER = "=========================================================================";
     private final String GREETING = "You are welcome by the translator.";
-    private final String DICTIONARIES = "Select a dictionary.\n" + "1. Dict1.\n2. Dict2.\n3. Exit.";
+    private final String DICTIONARIES = "Select a dictionary.\n" + "1. Latin Dictionary.\n2. Digit Dictionary.\n3. Exit.";
     private final String LIST_OF_ACTIONS = "1. Show dictionary contents.\n2. Translate one word." +
             "\n3. Add word to dictionary.\n4. Delete word from dictionary." +
-            "\n5. Return to dictionary selection.\n6. Back to dictionary selection\n7. Exit.";
+            "\n5. Back to dictionary selection.\n6. Exit.";
     private final String SELECT_ACT = "Select an action.\n" + LIST_OF_ACTIONS;
     private final String CONTENTS_DICT = "Contents of the dictionary:";
     private final String ENTER_WORD_TRANSLATE = "Enter a word to translate.";
@@ -49,12 +69,13 @@ public class ConsoleMenu {
         formatter.close();
     }
 
-    private void correctSelection(CheckMenuItems check, String menuItemBar) {
+    private String correctSelection(CheckMenuItems check, String menuItemBar) {
         String userInput = in.nextLine().trim();
         while (!check.checkOfMenuItemSelection(userInput)) {
             System.out.println(menuItemBar);
             userInput = in.nextLine().trim();
         }
+        return userInput;
     }
 
 
@@ -62,32 +83,33 @@ public class ConsoleMenu {
         showTemplate(GREETING);
     }
 
-    public void consoleShowDictionaryFiles() {
+    public String consoleShowDictionaryFiles() {
         showTemplate(DICTIONARIES);
-        correctSelection(dictionarySelection,DICTIONARIES + "\n" + DELIMITER);
+        return correctSelection(checkingDictionarySelection, DICTIONARIES + "\n" + DELIMITER);
     }
 
-    public void consoleShowMenu() {
+    public String consoleShowMenu() {
         showTemplate(SELECT_ACT);
-        correctSelection(actionSelection,SELECT_ACT + "\n" + DELIMITER);
+        return correctSelection(checkingDictionaryActionSelection, SELECT_ACT + "\n" + DELIMITER);
     }
 
-    public void consoleShowAllWords() {
+    public String consoleShowAllWords() {
         showTemplate(CONTENTS_DICT);
-        System.out.println(dictionaryStorage.showAllWords());
+        System.out.println(dictionaryStorageOnFileSystem.showAllWords());
         showTemplate(BACK + "\n" + EXIT);
-        correctSelection(checkExitPoint, BACK + "\n" + EXIT + "\n" + DELIMITER);
+        return correctSelection(checkExitPointFromMethod, BACK + "\n" + EXIT + "\n" + DELIMITER);
     }
 
-    public void consoleShowTranslationOneWord() {
+    public String consoleShowTranslationOneWord() {
         showTemplate(ENTER_WORD_TRANSLATE + "\n" + LATIN_ALPHABET + "\n" + BACK + "\n" + EXIT);
         String userInput = in.nextLine().trim().toLowerCase();
         while (!userInput.equals(ONE_BACK) && !userInput.equals(TWO_EXIT)) {
             useFormatter(userInput, TRANSLATE);
-            System.out.println(dictionaryStorage.translateOneWord(userInput));
-            showTemplate(ENTER_WORD_TRANSLATE + "\n" + LATIN_ALPHABET +"\n" + BACK + "\n" + EXIT);
+            System.out.println(dictionaryStorageOnFileSystem.translateOneWord(userInput));
+            showTemplate(ENTER_WORD_TRANSLATE + "\n" + LATIN_ALPHABET + "\n" + BACK + "\n" + EXIT);
             userInput = in.nextLine().trim().toLowerCase();
         }
+        return userInput;
     }
 
     public void consoleAddWord() {
@@ -95,7 +117,7 @@ public class ConsoleMenu {
         String userInput = in.nextLine().trim().toLowerCase();
         while (!userInput.equals(ONE_BACK) && !userInput.equals(TWO_EXIT)) {
             if (latinDict.checkOfDictionaryResponse(userInput)) {
-                dictionaryStorage.addWord(userInput);
+                dictionaryStorageOnFileSystem.addWord(userInput);
                 useFormatter(userInput, ADD);
             }
             showTemplate(ENTER_WORD_ADD + "\n" + BACK + "\n" + EXIT);
@@ -107,8 +129,8 @@ public class ConsoleMenu {
         showTemplate(ENTER_WORD_DEL + "\n" + BACK + "\n" + EXIT);
         String userInput = in.nextLine().trim().toLowerCase();
         while (!userInput.equals(ONE_BACK) && !userInput.equals(TWO_EXIT)) {
-            if (dictionaryStorage.deleteWord(userInput)) {
-                dictionaryStorage.deleteWord(userInput);
+            if (dictionaryStorageOnFileSystem.deleteWord(userInput)) {
+                dictionaryStorageOnFileSystem.deleteWord(userInput);
                 useFormatter(userInput, DELETE);
             } else System.out.println(ERROR_DELETE);
             showTemplate(ENTER_WORD_DEL + "\n" + BACK + "\n" + EXIT);
@@ -118,16 +140,5 @@ public class ConsoleMenu {
 
     public void runConsole() {
         consoleGreeting();
-        consoleShowDictionaryFiles();
-        String userInput = in.nextLine();
-//        switch (userInput) {
-//            case "1": consoleShowMenu();
-//            break;
-//            case "2": consoleShowMenu();
-//            break;
-//
-//            case "3": System.exit(0);
-//        }
     }
 }
-
