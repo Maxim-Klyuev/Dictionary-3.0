@@ -69,13 +69,12 @@ public class ConsoleMenu {
         formatter.close();
     }
 
-    private String correctSelection(CheckMenuItems check, String menuItemBar) {
+    private void correctSelection(CheckMenuItems check, String menuItemBar) {
         String userInput = in.nextLine().trim();
         while (!check.checkOfMenuItemSelection(userInput)) {
             System.out.println(menuItemBar);
             userInput = in.nextLine().trim();
         }
-        return userInput;
     }
 
 
@@ -83,24 +82,24 @@ public class ConsoleMenu {
         showTemplate(GREETING);
     }
 
-    public String consoleShowDictionaryFiles() {
+    public void consoleShowDictionaryFiles() {
         showTemplate(DICTIONARIES);
-        return correctSelection(checkingDictionarySelection, DICTIONARIES + "\n" + DELIMITER);
+        correctSelection(checkingDictionarySelection, DICTIONARIES + "\n" + DELIMITER);
     }
 
-    public String consoleShowMenu() {
+    public void consoleShowMenu() {
         showTemplate(SELECT_ACT);
-        return correctSelection(checkingDictionaryActionSelection, SELECT_ACT + "\n" + DELIMITER);
+        correctSelection(checkingDictionaryActionSelection, SELECT_ACT + "\n" + DELIMITER);
     }
 
-    public String consoleShowAllWords() {
+    public void consoleShowAllWords() {
         showTemplate(CONTENTS_DICT);
         System.out.println(dictionaryStorageOnFileSystem.showAllWords());
         showTemplate(BACK + "\n" + EXIT);
-        return correctSelection(checkExitPointFromMethod, BACK + "\n" + EXIT + "\n" + DELIMITER);
+        correctSelection(checkExitPointFromMethod, BACK + "\n" + EXIT + "\n" + DELIMITER);
     }
 
-    public String consoleShowTranslationOneWord() {
+    public void consoleShowTranslationOneWord() {
         showTemplate(ENTER_WORD_TRANSLATE + "\n" + LATIN_ALPHABET + "\n" + BACK + "\n" + EXIT);
         String userInput = in.nextLine().trim().toLowerCase();
         while (!userInput.equals(ONE_BACK) && !userInput.equals(TWO_EXIT)) {
@@ -109,7 +108,6 @@ public class ConsoleMenu {
             showTemplate(ENTER_WORD_TRANSLATE + "\n" + LATIN_ALPHABET + "\n" + BACK + "\n" + EXIT);
             userInput = in.nextLine().trim().toLowerCase();
         }
-        return userInput;
     }
 
     public void consoleAddWord() {
